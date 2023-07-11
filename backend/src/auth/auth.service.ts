@@ -21,12 +21,8 @@ export class AuthService {
     const userByEmail: User | null = await this.usersService.findOneByEmail(
       payload.email,
     );
-    console.log('salt', this.configService.get('SALT'));
     if (!userByEmail) {
-      const hashPassword: string = await bcrypt.hash(
-        payload.password,
-        this.configService.get('SALT'),
-      );
+      const hashPassword: string = await bcrypt.hash(payload.password, 5);
       return await this.usersService.createUser({
         ...payload,
         password: hashPassword,
@@ -39,8 +35,8 @@ export class AuthService {
     const user: User | null = await this.usersService.findOneByEmail(
       payload.email,
     );
-    if (await this.isPasswordValid(user.password, payload.password)) {
-      const jwtPayload = { sub: user.id };
+    if (await this.isPasswordValid(payload.password, user.password)) {
+      const jwtPayload = { userId: user.id };
       return {
         access_token: await this.jwtService.signAsync(jwtPayload),
       };
