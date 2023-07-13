@@ -12,4 +12,7 @@ export class registerUserDto {
 
   @IsNotEmpty()
   email: string;
+
+  @IsNotEmpty()
+  isAdmin: boolean;
 }

@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { registerUserDto } from './dto/register.dto';
 import { User } from 'src/users/entity/user.entity';
 import * as bcrypt from 'bcrypt';
-import { signInDto } from './dto/signIn.dto';
+import { logInDto } from './dto/logIn.dto';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -31,7 +31,7 @@ export class AuthService {
     throw new BadRequestException();
   }
 
-  async signIn(payload: signInDto): Promise<object | BadRequestException> {
+  async logIn(payload: logInDto): Promise<object | BadRequestException> {
     const user: User | null = await this.usersService.findOneByEmail(
       payload.email,
     );
