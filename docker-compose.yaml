@@ -1,43 +1,35 @@
-# version: '3.5'
-
-# services:
-#   db: 
-#     container_name: db
-#     ports:
-#       - "5432:5432"
-#     environment:
-#       - POSTGRES_PASSWORD=root
-#       - POSTGRES_USER=postgres
-#     image: postgres:13.11-bullseye
-      
-  
-version: '3.8'
+version: '3.4'
 
 networks:
   default:
 
 services:
-
-  db:
-    container_name: db
+  postgres:
+    container_name: postgres
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=root
       - POSTGRES_USER=postgres
-    image: postgres:13.11-bullseye   
+      - POSTGRES_DB=test
+    env_file: ./.env
+    image: postgres:14.0-alpine
+    restart: always
+    volumes:
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+      - postgres:/var/lib/postgresql/data
 
   nestjs-app:
     container_name: nestjs-app
-    # depends_on:
-    #   - mysql-db
+    depends_on:
+      - postgres
     build: ./backend
     restart: unless-stopped
     env_file: ./.env
     ports:
       - $NESTJS_APP_LOCAL_PORT:$NESTJS_APP_DOCKER_PORT
     environment:
-      - DB_HOST=$POSTGRESQLDB_HOST
+      - DB_HOST=postgres
       - DB_USER=$POSTGRESQLDB_USER
       - DB_PASSWORD=$POSTGRESQLDB_PASSWORD
       - DB_DATABASE=$POSTGRESQLDB_DATABASE
@@ -52,8 +44,9 @@ services:
     
   nextjs-app:
     container_name: nextjs-app
-    # depends_on: 
-      # - nestjs-app
+    depends_on:
+      - postgres
+      - nestjs-app
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -69,3 +62,6 @@ services:
       - /app/.next
     networks:
       - default
+
+volumes:
+  postgres:

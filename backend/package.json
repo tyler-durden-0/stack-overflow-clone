@@ -10,6 +10,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
+    "start:dev:migration": "npm run migration:run && npm run start:dev",
     "start:dev:docker": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -18,7 +19,14 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "migration:create": "npm run typeorm -- migration:create",
+    "migration:run": "npm run typeorm -- migration:run",
+    "migration:up": "npm run typeorm migration:run -- -d ./db/data-source.ts",
+    "migration:down": "npm run typeorm migration:revert",
+    "migrate:compiled": "tsc && ts-node dist/db/data-source.js && typeorm migration:run --dataSource dist/db/data-source.js",
+    "typeorm:migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run --dataSource dist/db/data-source.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
