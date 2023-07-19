@@ -26,10 +26,7 @@ export class AuthService {
     );
     if (!userByEmail) {
       const hashPassword: string = await bcrypt.hash(payload.password, 5);
-      const cache = await this.cacheManager.set(payload.email, payload.firstName, 1000000);
-      console.log('returnes cache', cache);
-      const getCache = await this.cacheManager.get(payload.email);
-      console.log('getCache', getCache);
+
       return await this.usersService.createUser({
         ...payload,
         password: hashPassword,
@@ -44,11 +41,31 @@ export class AuthService {
     );
     if (await this.isPasswordValid(payload.password, user.password)) {
       const jwtPayload = { userId: user.id };
+
+      const access_token = await this.jwtService.signAsync(jwtPayload);
+      const refresh_token = await this.jwtService.signAsync(jwtPayload, {expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES')});
+      
+      await this.cacheManager.set(`access_token:${user.id}`, access_token);
+      await this.cacheManager.set(`refresh_token:${user.id}`, refresh_token);
+
       return {
-        access_token: await this.jwtService.signAsync(jwtPayload),
+        access_token,
+        refresh_token,
       };
     }
     throw new BadRequestException();
+  }
+
+  async logOut(userId: number): Promise<void | BadRequestException> {
+    const user: User | undefined = await this.usersService.findOneById(userId);
+
+    if (user) {
+      await this.cacheManager.del(`access_token:${userId}`)
+      await this.cacheManager.del(`refresh_token:${userId}`)
+    } else {
+      throw new BadRequestException;
+    }
+
   }
 
   async isPasswordValid(

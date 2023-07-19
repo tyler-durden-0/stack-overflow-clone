@@ -9,6 +9,7 @@ import {
 import { AuthService } from './auth.service';
 import { registerUserDto } from './dto/register.dto';
 import { logInDto } from './dto/logIn.dto';
+import { logOutDto } from './dto/logOut.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -22,5 +23,11 @@ export class AuthController {
   @Post('login')
   signIn(@Body() payload: logInDto) {
     return this.authService.logIn(payload);
+  }
+
+  @Post('logout')
+  logOut(@Body() payload: logOutDto) {
+    const userId = payload.userId;
+    return this.authService.logOut(userId);
   }
 }

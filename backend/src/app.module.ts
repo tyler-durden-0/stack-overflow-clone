@@ -19,7 +19,7 @@ import { redisStore } from 'cache-manager-redis-store';
       store: async () => await redisStore({
         // Store-specific configuration:
         socket: {
-          host: 'redis-stack',
+          // host: 'redis-stack',
           port: 6379,
         }
       })
