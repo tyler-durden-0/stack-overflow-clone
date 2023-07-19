@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { registerUserDto } from './dto/register.dto';
@@ -6,10 +6,13 @@ import { User } from 'src/users/entity/user.entity';
 import * as bcrypt from 'bcrypt';
 import { logInDto } from './dto/logIn.dto';
 import { ConfigService } from '@nestjs/config';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: ConfigService,
     private usersService: UsersService,
     private jwtService: JwtService,
@@ -23,6 +26,10 @@ export class AuthService {
     );
     if (!userByEmail) {
       const hashPassword: string = await bcrypt.hash(payload.password, 5);
+      const cache = await this.cacheManager.set(payload.email, payload.firstName, 1000000);
+      console.log('returnes cache', cache);
+      const getCache = await this.cacheManager.get(payload.email);
+      console.log('getCache', getCache);
       return await this.usersService.createUser({
         ...payload,
         password: hashPassword,
