@@ -24,4 +24,4 @@ COPY . /app
 EXPOSE 3000
 
 # Run npm dev, as we would via the command line 
-CMD ["npm", "dev"]
+CMD npm run dev

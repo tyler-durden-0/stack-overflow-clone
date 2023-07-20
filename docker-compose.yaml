@@ -1,71 +1,82 @@
-# version: '3.5'
-
-# services:
-#   db: 
-#     container_name: db
-#     ports:
-#       - "5432:5432"
-#     environment:
-#       - POSTGRES_PASSWORD=root
-#       - POSTGRES_USER=postgres
-#     image: postgres:13.11-bullseye
-      
-  
 version: '3.8'
 
 networks:
   default:
 
 services:
-
-  db:
-    container_name: db
+  postgres:
+    container_name: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_PASSWORD=root
       - POSTGRES_USER=postgres
-    image: postgres:13.11-bullseye   
+      - POSTGRES_DB=test
+    env_file: ./.env
+    image: postgres:14.0-alpine
+    restart: always
+    volumes:
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+      - postgres:/var/lib/postgresql/data
 
-  nestjs-app:
-    container_name: nestjs-app
-    # depends_on:
-    #   - mysql-db
-    build: ./backend
-    restart: unless-stopped
-    env_file: ./.env
-    ports:
-      - $NESTJS_APP_LOCAL_PORT:$NESTJS_APP_DOCKER_PORT
+  redis-stack:
+    image: redis/redis-stack:latest
+    container_name: redis-stack
+    restart: always
+    #fixed problem with saving information for persistance of redis
     environment:
-      - DB_HOST=$POSTGRESQLDB_HOST
-      - DB_USER=$POSTGRESQLDB_USER
-      - DB_PASSWORD=$POSTGRESQLDB_PASSWORD
-      - DB_DATABASE=$POSTGRESQLDB_DATABASE
-      - DB_PORT=$POSTGRESQLDB_DOCKER_PORT
-    stdin_open: true
-    tty: true
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    networks:
-      - default
-    
-  nextjs-app:
-    container_name: nextjs-app
-    # depends_on: 
-      # - nestjs-app
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    env_file: ./.env
+    - REDIS_ARGS=--save 1 1
     ports:
-      - $NEXTJS_APP_LOCAL_PORT:$NEXTJS_APP_DOCKER_PORT
-    stdin_open: true
-    tty: true
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+      - "6379:6379"
+      - "8001:8001"
     networks:
       - default
+    volumes:
+      - redis_data:/data
+
+  # nestjs-app:
+  #   container_name: nestjs-app
+  #   depends_on:
+  #     - postgres
+  #     - redis-stack
+  #   build: ./backend
+  #   restart: unless-stopped
+  #   env_file: ./.env
+  #   ports:
+  #     - $NESTJS_APP_LOCAL_PORT:$NESTJS_APP_DOCKER_PORT
+  #   environment:
+  #     - DB_HOST=postgres
+  #     - DB_USER=$POSTGRESQLDB_USER
+  #     - DB_PASSWORD=$POSTGRESQLDB_PASSWORD
+  #     - DB_DATABASE=$POSTGRESQLDB_DATABASE
+  #     - DB_PORT=$POSTGRESQLDB_DOCKER_PORT
+  #   stdin_open: true
+  #   tty: true
+  #   volumes:
+  #     - ./backend:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - default
+    
+  # nextjs-app:
+  #   container_name: nextjs-app
+  #   depends_on:
+  #     - nestjs-app
+  #   build:
+  #     context: ./frontend
+  #   restart: unless-stopped
+  #   env_file: ./.env
+  #   ports:
+  #     - $NEXTJS_APP_LOCAL_PORT:$NEXTJS_APP_DOCKER_PORT
+  #   stdin_open: true
+  #   tty: true
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #     - /app/.next
+  #   networks:
+  #     - default
+
+volumes:
+  postgres:
+  redis_data:
