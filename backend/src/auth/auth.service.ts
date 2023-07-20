@@ -1,14 +1,12 @@
 import { BadRequestException, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { registerUserDto } from './dto/register.dto';
 import { User } from 'src/users/entity/user.entity';
 import * as bcrypt from 'bcrypt';
-import { logInDto } from './dto/logIn.dto';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { refreshDto } from './dto/refresh.dto';
+import { logInDto, refreshDto, registerUserDto } from './dto';
 
 @Injectable()
 export class AuthService {
@@ -88,6 +86,7 @@ export class AuthService {
           const refresh_token = await this.jwtService.signAsync(jwtPayload, {expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES')});
       
           //save in Redis
+          await this.cacheManager.set(`access_token:${decodedToken.userId}`, access_token);
           await this.cacheManager.set(`refresh_token:${decodedToken.userId}`, refresh_token);
   
           return {

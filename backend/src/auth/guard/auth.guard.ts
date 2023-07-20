@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,10 +11,13 @@ import { ConfigService } from '@nestjs/config';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entity/user.entity';
 import { Role } from '../roles/roles.enum';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private jwtService: JwtService,
     private configService: ConfigService,
     private usersService: UsersService,
@@ -29,10 +33,12 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
-      const userRole: string = (await this.isAdmin(payload.userId))
-        ? Role.admin
-        : Role.user;
-      request['user'] = { ...payload, roles: userRole };
+      if (!await this.isUserLogOut(payload.userId)) {
+        const userRole: string = (await this.isAdmin(payload.userId)) ? Role.admin : Role.user;
+        request['user'] = { ...payload, roles: userRole };
+      } else {
+        throw new UnauthorizedException();
+      }
     } catch {
       throw new UnauthorizedException();
     }
@@ -47,5 +53,15 @@ export class AuthGuard implements CanActivate {
   private async isAdmin(userId: number) {
     const user: User | null = await this.usersService.findOneById(userId);
     return user?.isAdmin;
+  }
+
+  private async isUserLogOut(userId: number): Promise<boolean> {
+    try {
+      const access_token = await this.cacheManager.get(`access_token:${userId}`);
+      const refresh_token = await this.cacheManager.get(`refresh_token:${userId}`);
+      return access_token && refresh_token ? false : true;
+    } catch {
+      return true;
+    }
   }
 }
