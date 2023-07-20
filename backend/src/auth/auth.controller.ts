@@ -2,14 +2,12 @@ import {
   Body,
   Controller,
   Post,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { registerUserDto } from './dto/register.dto';
 import { logInDto } from './dto/logIn.dto';
 import { logOutDto } from './dto/logOut.dto';
+import { refreshDto } from './dto/refresh.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -29,5 +27,10 @@ export class AuthController {
   logOut(@Body() payload: logOutDto) {
     const userId = payload.userId;
     return this.authService.logOut(userId);
+  }
+
+  @Post('refresh')
+  refresh(@Body() payload: refreshDto) {
+    return this.authService.refresh(payload);
   }
 }

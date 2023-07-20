@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { registerUserDto } from './dto/register.dto';
@@ -8,6 +8,7 @@ import { logInDto } from './dto/logIn.dto';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { refreshDto } from './dto/refresh.dto';
 
 @Injectable()
 export class AuthService {
@@ -66,6 +67,44 @@ export class AuthService {
       throw new BadRequestException;
     }
 
+  }
+
+  async refresh(payload: refreshDto): Promise<object | BadRequestException | HttpException> {
+    try {
+      const decodedToken = await this.jwtService.verifyAsync(payload.refresh_token, {
+        secret: this.configService.get<string>('JWT_SECRET'),
+      });
+      if (typeof decodedToken === 'object') {
+        console.log('decodedToken.userId', decodedToken.userId);
+        console.log('this.cacheManager.get(`refresh_token:${decodedToken.userId}`)', await this.cacheManager.get(`refresh_token:${decodedToken.userId}`))
+        if (await this.cacheManager.get(`refresh_token:${decodedToken.userId}`) === payload.refresh_token) {
+          //delete old token
+          await this.cacheManager.del(`refresh_token:${decodedToken.userId}`);
+  
+          //generate new access and refresh tokens
+          const jwtPayload = {userId: decodedToken.userId};
+  
+          const access_token = await this.jwtService.signAsync(jwtPayload);
+          const refresh_token = await this.jwtService.signAsync(jwtPayload, {expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES')});
+      
+          //save in Redis
+          await this.cacheManager.set(`refresh_token:${decodedToken.userId}`, refresh_token);
+  
+          return {
+            access_token,
+            refresh_token,
+          };
+        } else {
+          throw new HttpException('Redirect to the /login', HttpStatus.FOUND, {description: 'Redirect to the /login'})
+        }
+      }
+    } catch(e) {
+      if (e.status === 302) {
+        throw new HttpException('Redirect to the /login', HttpStatus.FOUND, {description: 'Redirect to the /login'})
+      } else {
+        throw new BadRequestException;
+      }
+    }
   }
 
   async isPasswordValid(
