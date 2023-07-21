@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Answer } from 'src/answer/entity/answer.entity';
+import { Question } from 'src/question/entity/question.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class User {
@@ -19,4 +21,10 @@ export class User {
 
   @Column()
   isAdmin: boolean;
+
+  @OneToMany(() => Answer, (answer) => answer.user)
+  answers: Answer[]
+
+  @OneToMany(() => Question, (question) => question.user)
+  questions: Question[]
 }

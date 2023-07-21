@@ -8,6 +8,11 @@ import { UsersModule } from './users/users.module';
 import { dataSourceOptions } from '../db/data-source';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
+import { QuestionService } from './question/question.service';
+import { QuestionController } from './question/question.controller';
+import { QuestionModule } from './question/question.module';
+import { AnswerModule } from './answer/answer.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -26,8 +31,11 @@ import { redisStore } from 'cache-manager-redis-store';
     }),
     AuthModule,
     UsersModule,
+    QuestionModule,
+    AnswerModule,
+    JwtModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, QuestionController],
+  providers: [AppService, QuestionService],
 })
 export class AppModule {}
