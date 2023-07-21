@@ -15,8 +15,18 @@ export class QuestionController {
     async getQuestions() {
         try {
             const questions: Question[] | BadRequestException = await this.questionService.getQuestions();
-
             return {questions};
+        } catch {
+            throw new BadRequestException();
+        }
+    }
+
+    @Get('/:id')
+    @UseGuards(AuthGuard)
+    async getQuestionById(@Param('id') id: number) {
+        try {
+            const question: Question = await this.questionService.getQuestionWithAnswersById(id);
+            return {question};
         } catch {
             throw new BadRequestException();
         }

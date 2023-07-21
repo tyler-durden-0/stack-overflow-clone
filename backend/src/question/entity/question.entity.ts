@@ -25,10 +25,10 @@ export class Question {
   @CreateDateColumn({ type: 'timestamp' })
   dateOfCreation: Date;
 
-  @CreateDateColumn({ type: 'timestamp', nullable: true })
+  @CreateDateColumn({ type: 'timestamp' })
   dateOfUpdate: Date;
 
-  @OneToMany(() => Answer, (answer) => answer.user)
+  @OneToMany(() => Answer, (answer) => answer.question)
   answers: Answer[]
 
   @ManyToOne(() => User, (user) => user.questions)

@@ -13,10 +13,13 @@ export class Answer {
   @Column()
   text: string;
 
-  @CreateDateColumn()
+  @Column({default: 0})
+  rating: number;
+
+  @CreateDateColumn({ type: 'timestamp' })
   dateOfCreation: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   dateOfUpdate: Date;
 
   @ManyToOne(() => User, (user) => user.answers)

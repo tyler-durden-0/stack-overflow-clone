@@ -8,8 +8,7 @@ import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class QuestionService {
-    constructor(
-        @InjectRepository(Question) private questionRepository: Repository<Question>, private usersService: UsersService,) {}
+    constructor(@InjectRepository(Question) private questionRepository: Repository<Question>, private usersService: UsersService) {}
 
     async createQuestion(payload: Partial<createQuestionDto> & {userId: number}): Promise<Question | BadRequestException> {
         try {
@@ -34,6 +33,10 @@ export class QuestionService {
 
     async getQuestionById(id: number): Promise<Question> {
         return await this.questionRepository.findOneBy({id});
+    }
+
+    async getQuestionWithAnswersById(id: number): Promise<Question> {
+        return await this.questionRepository.findOne({relations: {answers: true}, where: {id}});
     }
 
     async getUsersQuestionById(id: number): Promise<Question> {
