@@ -3,7 +3,7 @@ import { AnswerService } from './answer.service';
 import { createAnswerDto, updateAnswerDto } from './dto';
 import { Role, Roles, RolesGuard } from 'src/auth/roles';
 import { AuthGuard } from 'src/auth/guard';
-import { Answer } from './entity/answer.entity';
+import { Answer } from './entities/answer.entity';
 
 @Controller('answer')
 export class AnswerController {

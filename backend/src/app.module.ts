@@ -13,6 +13,7 @@ import { QuestionController } from './question/question.controller';
 import { QuestionModule } from './question/question.module';
 import { AnswerModule } from './answer/answer.module';
 import { JwtModule } from '@nestjs/jwt';
+import { TagModule } from './tag/tag.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { JwtModule } from '@nestjs/jwt';
     QuestionModule,
     AnswerModule,
     JwtModule,
+    TagModule,
   ],
   controllers: [AppController, QuestionController],
   providers: [AppService, QuestionService],

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
-import { Answer } from './entity/answer.entity';
+import { Answer } from './entities/answer.entity';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createAnswerDto, updateAnswerDto } from './dto';
-import { User } from 'src/users/entity/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import { QuestionService } from 'src/question/question.service';
-import { Question } from 'src/question/entity/question.entity';
+import { Question } from 'src/question/entities/question.entity';
 
 @Injectable()
 export class AnswerService {

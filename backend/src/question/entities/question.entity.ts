@@ -1,6 +1,7 @@
-import { Answer } from 'src/answer/entity/answer.entity';
-import { User } from 'src/users/entity/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Answer } from 'src/answer/entities/answer.entity';
+import { Tag } from 'src/tag/entities/tag.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 
 @Entity()
 export class Question {
@@ -14,13 +15,10 @@ export class Question {
   title: string;
 
   @Column({default: ''})
-  desription: string;
+  description: string;
 
   @Column({default: 0})
   rating: number;
-
-  @Column('text', {array: true})
-  tags: string[];
 
   @CreateDateColumn({ type: 'timestamp' })
   dateOfCreation: Date;
@@ -30,7 +28,11 @@ export class Question {
 
   @OneToMany(() => Answer, (answer) => answer.question)
   answers: Answer[]
-
+  
   @ManyToOne(() => User, (user) => user.questions)
   user: User
+
+  @ManyToMany(() => Tag)
+  @JoinTable()
+  tags: Tag[]
 }

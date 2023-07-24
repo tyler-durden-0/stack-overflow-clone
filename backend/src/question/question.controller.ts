@@ -1,7 +1,7 @@
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { QuestionService } from './question.service';
 import { createQuestionDto } from './dto';
-import { Question } from './entity/question.entity';
+import { Question } from './entities/question.entity';
 import { AuthGuard } from 'src/auth/guard';
 import { Role, Roles, RolesGuard } from 'src/auth/roles';
 import { updateQuestionDto } from './dto/updateQuestion.dto';
