@@ -10,37 +10,30 @@ import { UsersService } from 'src/users/users.service';
 export class QuestionService {
     constructor(@InjectRepository(Question) private questionRepository: Repository<Question>, private usersService: UsersService) {}
 
-    async createQuestion(payload: Partial<createQuestionDto> & {userId: number}): Promise<Question | BadRequestException> {
-        try {
-            const userEntity: User = await this.usersService.findOneById(payload.userId);
+    async createQuestion(payload: Partial<createQuestionDto> & {userId: number}): Promise<Question> {
+        const userEntity: User = await this.usersService.findOneById(payload.userId);
 
-            const newQuestionEntity: Question = this.questionRepository.create({ ...payload })
+        const newQuestionEntity: Question = this.questionRepository.create({ ...payload })
 
-            newQuestionEntity.user = userEntity;
+        newQuestionEntity.user = userEntity;
 
-            await this.questionRepository.save(newQuestionEntity);
-
-            return newQuestionEntity;
-        } catch {
-            throw new BadRequestException();
-        }
-
+        return this.questionRepository.save(newQuestionEntity);
     }
 
     async getQuestions(): Promise<Question[] | BadRequestException> {
-        return await this.questionRepository.find();
+        return this.questionRepository.find();
     }
 
     async getQuestionById(id: number): Promise<Question> {
-        return await this.questionRepository.findOneBy({id});
+        return this.questionRepository.findOneBy({id});
     }
 
     async getQuestionWithAnswersById(id: number): Promise<Question> {
-        return await this.questionRepository.findOne({relations: {answers: true}, where: {id}});
+        return this.questionRepository.findOne({relations: {answers: true}, where: {id}});
     }
 
     async getUsersQuestionById(id: number): Promise<Question> {
-        return await this.questionRepository.findOne({relations: {user: true}, where: {id}});
+        return this.questionRepository.findOne({relations: {user: true}, where: {id}});
     }
 
     async updateQuestionById(payload: Partial<updateQuestionDto> & {questionId: number}): Promise<boolean> {

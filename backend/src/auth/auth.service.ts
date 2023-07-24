@@ -73,8 +73,6 @@ export class AuthService {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
       if (typeof decodedToken === 'object') {
-        console.log('decodedToken.userId', decodedToken.userId);
-        console.log('this.cacheManager.get(`refresh_token:${decodedToken.userId}`)', await this.cacheManager.get(`refresh_token:${decodedToken.userId}`))
         if (await this.cacheManager.get(`refresh_token:${decodedToken.userId}`) === payload.refresh_token) {
           //delete old token
           await this.cacheManager.del(`refresh_token:${decodedToken.userId}`);

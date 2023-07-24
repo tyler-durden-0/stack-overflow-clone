@@ -54,7 +54,7 @@ export class QuestionController {
             const userRole: string = req.user.roles;
             if (userRole === Role.user) {
                 const usersQuestion: Question = await this.questionService.getUsersQuestionById(id);
-                console.log('@@@usersQuestion', usersQuestion);
+
                 if (usersQuestion && usersQuestion.user.id === userId) {
                     const isUpdated: boolean = await this.questionService.updateQuestionById({...payload, questionId: id});
                     return {success: isUpdated};
