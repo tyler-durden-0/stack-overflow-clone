@@ -1,11 +1,12 @@
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { QuestionService } from './question.service';
-import { createQuestionDto, upvoteQuestionDto } from './dto';
+import { createQuestionDto, upvoteQuestionDto, downvoteQuestionDto } from './dto';
 import { Question } from './entities/question.entity';
 import { AuthGuard } from 'src/auth/guard';
 import { Role, Roles, RolesGuard } from 'src/auth/roles';
 import { updateQuestionDto } from './dto/updateQuestion.dto';
 import { LikeQuestion } from 'src/like-question/entities/like-question.entity';
+import { DislikeQuestion } from 'src/dislike-question/entities/dislike-question.entity';
 
 @Controller('question')
 export class QuestionController {
@@ -124,6 +125,24 @@ export class QuestionController {
             } else {
                 const isLikeDeleted: boolean = await this.questionService.removeLikeQuestion(userId, questionId);
                 return {success: isLikeDeleted};
+            }
+        } catch(err) {
+            throw err
+        }
+    }
+
+    @Post('/:id/downvote')
+    @Roles(Role.user)
+    @UseGuards(AuthGuard, RolesGuard)
+    async downvoteAnswer(@Param('id') answerId: number, @Body() downvoteQuestionDto: downvoteQuestionDto, @Req() req: any) {
+        try {
+            const userId: number = req.user.userId;
+            if (downvoteQuestionDto.increase) {
+                const isDislikeCreated: DislikeQuestion = await this.questionService.dislikeQuestion(userId, answerId);
+                return {success: !!isDislikeCreated};
+            } else {
+                const isDislikeDeleted: boolean = await this.questionService.removeDislikeQuestion(userId, answerId);
+                return {success: isDislikeDeleted};
             }
         } catch(err) {
             throw err

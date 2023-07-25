@@ -1,6 +1,6 @@
 import { IsBoolean, IsNotEmpty } from 'class-validator';
 
-export class dwonvoteAnswerDto {
+export class downvoteAnswerDto {
   @IsNotEmpty()
   @IsBoolean()
   increase: boolean;

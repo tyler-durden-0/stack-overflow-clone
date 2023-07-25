@@ -10,6 +10,7 @@ import { Question } from 'src/question/entities/question.entity';
 import { LikeAnswerService } from 'src/like-answer/like-answer.service';
 import { LikeAnswer } from 'src/like-answer/entities/like-answer.entity';
 import { DislikeAnswerService } from 'src/dislike-answer/dislike-answer.service';
+import { DislikeAnswer } from 'src/dislike-answer/entities/dislike-answer.entity';
 
 @Injectable()
 export class AnswerService {
@@ -119,12 +120,12 @@ export class AnswerService {
         }
     }
 
-    async dislikeAnswer(userId: number, answerId: number): Promise<LikeAnswer> {
+    async dislikeAnswer(userId: number, answerId: number): Promise<DislikeAnswer> {
         try {
             const user: User = await this.usersService.findOneById(userId);
             const answer: Answer = await this.getAnswerById(answerId);
             if (user && answer ) {
-                const dislike: LikeAnswer = await this.disLikeAnswerService.getDislikeOnAnswer(user, answer);
+                const dislike: DislikeAnswer = await this.disLikeAnswerService.getDislikeOnAnswer(user, answer);
                 if (!dislike) {
                     return this.disLikeAnswerService.createDislikeOnAnswer(user, answer);
                 } else {
@@ -147,7 +148,7 @@ export class AnswerService {
             const user: User = await this.usersService.findOneById(userId);
             const answer: Answer = await this.getAnswerById(answerId);
             if (user && answer) {
-                const dislike: LikeAnswer = await this.disLikeAnswerService.getDislikeOnAnswer(user, answer);
+                const dislike: DislikeAnswer = await this.disLikeAnswerService.getDislikeOnAnswer(user, answer);
                 if (dislike) {
                     return this.disLikeAnswerService.removeDislikeOnAnswer(dislike.id);
                 } else {

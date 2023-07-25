@@ -1,4 +1,5 @@
 import { Answer } from 'src/answer/entities/answer.entity';
+import { DislikeQuestion } from 'src/dislike-question/entities/dislike-question.entity';
 import { LikeQuestion } from 'src/like-question/entities/like-question.entity';
 import { Tag } from 'src/tag/entities/tag.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -35,6 +36,9 @@ export class Question {
 
   @OneToMany(() => LikeQuestion, (like) => like.question)
   likes: LikeQuestion[];
+
+  @OneToMany(() => DislikeQuestion, (like) => like.question)
+  dislikes: DislikeQuestion[];
 
   @ManyToMany(() => Tag)
   @JoinTable()

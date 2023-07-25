@@ -16,6 +16,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { TagModule } from './tag/tag.module';
 import { LikeQuestionModule } from './like-question/like-question.module';
 import { LikeAnswerModule } from './like-answer/like-answer.module';
+import { DislikeAnswerModule } from './dislike-answer/dislike-answer.module';
+import { DislikeQuestionModule } from './dislike-question/dislike-question.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { LikeAnswerModule } from './like-answer/like-answer.module';
     TagModule,
     LikeQuestionModule,
     LikeAnswerModule,
+    DislikeAnswerModule,
+    DislikeQuestionModule
   ],
   controllers: [AppController, QuestionController],
   providers: [AppService, QuestionService],

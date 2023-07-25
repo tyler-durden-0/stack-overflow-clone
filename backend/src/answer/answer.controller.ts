@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AnswerService } from './answer.service';
-import { createAnswerDto, updateAnswerDto, upvoteAnswerDto } from './dto';
+import { createAnswerDto, updateAnswerDto, upvoteAnswerDto, downvoteAnswerDto } from './dto';
 import { Role, Roles, RolesGuard } from 'src/auth/roles';
 import { AuthGuard } from 'src/auth/guard';
 import { Answer } from './entities/answer.entity';
@@ -110,7 +110,7 @@ export class AnswerController {
     @Post('/:id/downvote')
     @Roles(Role.user)
     @UseGuards(AuthGuard, RolesGuard)
-    async downvoteAnswer(@Param('id') answerId: number, @Body() downvoteAnswerDto: upvoteAnswerDto, @Req() req: any) {
+    async downvoteAnswer(@Param('id') answerId: number, @Body() downvoteAnswerDto: downvoteAnswerDto, @Req() req: any) {
         try {
             const userId: number = req.user.userId;
             if (downvoteAnswerDto.increase) {
