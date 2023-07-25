@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { QuestionService } from './question.service';
-import { createQuestionDto, upvoteQuestionDto, downvoteQuestionDto } from './dto';
+import { createQuestionDto, upvoteQuestionDto, downvoteQuestionDto, filterByTagDto } from './dto';
 import { Question } from './entities/question.entity';
 import { AuthGuard } from 'src/auth/guard';
 import { Role, Roles, RolesGuard } from 'src/auth/roles';
@@ -134,7 +134,7 @@ export class QuestionController {
     @Post('/:id/downvote')
     @Roles(Role.user)
     @UseGuards(AuthGuard, RolesGuard)
-    async downvoteAnswer(@Param('id') answerId: number, @Body() downvoteQuestionDto: downvoteQuestionDto, @Req() req: any) {
+    async downvoteQuestion(@Param('id') answerId: number, @Body() downvoteQuestionDto: downvoteQuestionDto, @Req() req: any) {
         try {
             const userId: number = req.user.userId;
             if (downvoteQuestionDto.increase) {
@@ -144,6 +144,17 @@ export class QuestionController {
                 const isDislikeDeleted: boolean = await this.questionService.removeDislikeQuestion(userId, answerId);
                 return {success: isDislikeDeleted};
             }
+        } catch(err) {
+            throw err
+        }
+    }
+
+    @Get('/filter/tags')
+    @Roles(Role.user)
+    @UseGuards(AuthGuard, RolesGuard)
+    async getQuestionsByTags(@Body() payload: filterByTagDto) {
+        try {
+            return await this.questionService.getQuestionsByArrayOfTagNames(payload.tags);
         } catch(err) {
             throw err
         }

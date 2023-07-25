@@ -52,6 +52,32 @@ export class QuestionService {
         return this.questionRepository.findOne({relations: {answers: true}, where: {id}});
     }
 
+    async getQuestionsByTag(tagName: string): Promise<Question[]> {
+        return this.questionRepository.find({relations: ['tags'], where: {tags: {name: tagName}}})
+    }
+
+    async getQuestionsByArrayOfTagNames(tagnames: string[]): Promise<Question[]> {
+        try {
+            const questions: Question[] = [];
+
+            for (const name of tagnames) {
+                const tag: Tag = await this.tagsService.findTagByName(name);
+                if (tag) {
+                    const result: Question[] = await this.getQuestionsByTag(name);
+                    if (result !== null) {
+                        questions.push(...result);
+                    }
+                } else {
+                    throw new HttpException(`Tag: "${name}" does not exist`, HttpStatus.BAD_REQUEST);
+                }
+            }
+        
+            return questions;
+        } catch(err) {
+            throw err;
+        }
+    }
+
     async getUsersQuestionById(id: number): Promise<Question> {
         return this.questionRepository.findOne({relations: {user: true}, where: {id}});
     }
