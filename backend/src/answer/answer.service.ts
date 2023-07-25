@@ -9,6 +9,7 @@ import { QuestionService } from 'src/question/question.service';
 import { Question } from 'src/question/entities/question.entity';
 import { LikeAnswerService } from 'src/like-answer/like-answer.service';
 import { LikeAnswer } from 'src/like-answer/entities/like-answer.entity';
+import { DislikeAnswerService } from 'src/dislike-answer/dislike-answer.service';
 
 @Injectable()
 export class AnswerService {
@@ -16,7 +17,8 @@ export class AnswerService {
         @InjectRepository(Answer) private answerRepository: Repository<Answer>,
         private usersService: UsersService,
         private questionService: QuestionService,
-        private likeAnswerService: LikeAnswerService) {}
+        private likeAnswerService: LikeAnswerService,
+        private disLikeAnswerService: DislikeAnswerService) {}
 
     async getAnswerById(answerId: number): Promise<Answer> {
         return this.answerRepository.findOneBy({id: answerId})
@@ -116,4 +118,51 @@ export class AnswerService {
             throw err;
         }
     }
+
+    async dislikeAnswer(userId: number, answerId: number): Promise<LikeAnswer> {
+        try {
+            const user: User = await this.usersService.findOneById(userId);
+            const answer: Answer = await this.getAnswerById(answerId);
+            if (user && answer ) {
+                const dislike: LikeAnswer = await this.disLikeAnswerService.getDislikeOnAnswer(user, answer);
+                if (!dislike) {
+                    return this.disLikeAnswerService.createDislikeOnAnswer(user, answer);
+                } else {
+                    throw new HttpException('You already disliked this answer', HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                if (!answer) {
+                    throw new HttpException('This answer does not exist', HttpStatus.BAD_REQUEST);
+                } else {
+                    throw new HttpException('This user does not exist', HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch(err) {
+            throw err;
+        }
+    }
+
+    async removeDislikeAnswer(userId: number, answerId: number): Promise<boolean> {
+        try {
+            const user: User = await this.usersService.findOneById(userId);
+            const answer: Answer = await this.getAnswerById(answerId);
+            if (user && answer) {
+                const dislike: LikeAnswer = await this.disLikeAnswerService.getDislikeOnAnswer(user, answer);
+                if (dislike) {
+                    return this.disLikeAnswerService.removeDislikeOnAnswer(dislike.id);
+                } else {
+                    throw new HttpException('You did not dislike this answer', HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                if (!answer) {
+                    throw new HttpException('This answer does not exist', HttpStatus.BAD_REQUEST);
+                } else {
+                    throw new HttpException('This user does not exist', HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch(err) {
+            throw err;
+        }
+    }
+
 }

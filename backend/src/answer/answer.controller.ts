@@ -5,6 +5,7 @@ import { Role, Roles, RolesGuard } from 'src/auth/roles';
 import { AuthGuard } from 'src/auth/guard';
 import { Answer } from './entities/answer.entity';
 import { LikeAnswer } from 'src/like-answer/entities/like-answer.entity';
+import { DislikeAnswer } from 'src/dislike-answer/entities/dislike-answer.entity';
 
 @Controller('answer')
 export class AnswerController {
@@ -106,15 +107,21 @@ export class AnswerController {
         }
     }
     
-    // @Post('/:id/downvote')
-    // @Roles(Role.user)
-    // @UseGuards(AuthGuard, RolesGuard)
-    // async upvoteAnswer(@Param('id') answerId: number, @Req() req: any) {
-    //     try {
-    //         const userId: number = req.user.userId;
-    //         return await this.answerService.likeAnswer(userId, answerId);
-    //     } catch(err) {
-    //         throw err
-    //     }
-    // }
+    @Post('/:id/downvote')
+    @Roles(Role.user)
+    @UseGuards(AuthGuard, RolesGuard)
+    async downvoteAnswer(@Param('id') answerId: number, @Body() downvoteAnswerDto: upvoteAnswerDto, @Req() req: any) {
+        try {
+            const userId: number = req.user.userId;
+            if (downvoteAnswerDto.increase) {
+                const isDislikeCreated: DislikeAnswer = await this.answerService.dislikeAnswer(userId, answerId);
+                return {success: !!isDislikeCreated};
+            } else {
+                const isDislikeDeleted: boolean = await this.answerService.removeDislikeAnswer(userId, answerId);
+                return {success: isDislikeDeleted};
+            }
+        } catch(err) {
+            throw err
+        }
+    }
 }

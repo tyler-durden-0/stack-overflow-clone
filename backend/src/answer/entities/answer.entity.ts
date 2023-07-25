@@ -1,3 +1,4 @@
+import { DislikeAnswer } from 'src/dislike-answer/entities/dislike-answer.entity';
 import { LikeAnswer } from 'src/like-answer/entities/like-answer.entity';
 import { Question } from 'src/question/entities/question.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -31,4 +32,7 @@ export class Answer {
 
   @OneToMany(() => LikeAnswer, (like) => like.answer)
   likes: LikeAnswer[];
+
+  @OneToMany(() => DislikeAnswer, (like) => like.answer)
+  dislikes: DislikeAnswer[];
 }
