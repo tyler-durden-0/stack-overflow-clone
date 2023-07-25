@@ -6,14 +6,18 @@ import { AuthGuard } from 'src/auth/guard';
 import { Answer } from './entities/answer.entity';
 import { LikeAnswer } from 'src/like-answer/entities/like-answer.entity';
 import { DislikeAnswer } from 'src/dislike-answer/entities/dislike-answer.entity';
+import { ApiBearerAuth, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @Controller('answer')
+@Roles(Role.user)
+@UseGuards(AuthGuard, RolesGuard)
+@ApiTags('Answer')
+@ApiBearerAuth('JWT-auth')
+@ApiUnauthorizedResponse({ description: 'Unauthorized, please login' })
 export class AnswerController {
     constructor(private answerService: AnswerService) {}
 
     @Post()
-    @Roles(Role.user, Role.admin)
-    @UseGuards(AuthGuard, RolesGuard)
     async createAnswer(@Body() payload: createAnswerDto, @Req() req: any) {
         try {
             const userId: number = req.user.userId;
@@ -24,8 +28,7 @@ export class AnswerController {
     }
 
     @Patch('/:id')
-    @Roles(Role.user, Role.admin)
-    @UseGuards(AuthGuard, RolesGuard)
+    @Roles(Role.admin)
     async updateAnswer(@Body() payload: updateAnswerDto, @Param('id') answerId: number, @Req() req: any) {
         try {
             const userId: number = req.user.userId;
@@ -58,8 +61,7 @@ export class AnswerController {
 
     
     @Delete('/:id')
-    @Roles(Role.user, Role.admin)
-    @UseGuards(AuthGuard, RolesGuard)
+    @Roles(Role.admin)
     async deleteAnswer(@Param('id') answerId: number, @Req() req: any) {
         try {
             const userId: number = req.user.userId;
@@ -90,8 +92,6 @@ export class AnswerController {
     }
     
     @Post('/:id/upvote')
-    @Roles(Role.user)
-    @UseGuards(AuthGuard, RolesGuard)
     async upvoteAnswer(@Param('id') answerId: number, @Body() upvoteAnswerDto: upvoteAnswerDto, @Req() req: any) {
         try {
             const userId: number = req.user.userId;
@@ -108,8 +108,6 @@ export class AnswerController {
     }
     
     @Post('/:id/downvote')
-    @Roles(Role.user)
-    @UseGuards(AuthGuard, RolesGuard)
     async downvoteAnswer(@Param('id') answerId: number, @Body() downvoteAnswerDto: downvoteAnswerDto, @Req() req: any) {
         try {
             const userId: number = req.user.userId;

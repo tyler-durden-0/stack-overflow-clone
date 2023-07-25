@@ -7,13 +7,17 @@ import { Role, Roles, RolesGuard } from 'src/auth/roles';
 import { updateQuestionDto } from './dto/updateQuestion.dto';
 import { LikeQuestion } from 'src/like-question/entities/like-question.entity';
 import { DislikeQuestion } from 'src/dislike-question/entities/dislike-question.entity';
+import { ApiBearerAuth, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @Controller('question')
+@UseGuards(AuthGuard)
+@ApiTags('Question')
+@ApiBearerAuth('JWT-auth')
+@ApiUnauthorizedResponse({ description: 'Unauthorized, please login' })
 export class QuestionController {
     constructor(private questionService: QuestionService) {}
 
     @Get('')
-    @UseGuards(AuthGuard)
     async getQuestions() {
         try {
             const questions: Question[] | BadRequestException = await this.questionService.getQuestions();
@@ -24,7 +28,6 @@ export class QuestionController {
     }
 
     @Get('/:id')
-    @UseGuards(AuthGuard)
     async getQuestionById(@Param('id') id: number) {
         try {
             const question: Question = await this.questionService.getQuestionWithAnswersById(id);
@@ -36,7 +39,7 @@ export class QuestionController {
 
     @Post('')
     @Roles(Role.user)
-    @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(RolesGuard)
     async createQuestion(@Body() payload: createQuestionDto, @Req() req: any) {
         try {
             const userId: number = req.user.userId;
@@ -49,7 +52,7 @@ export class QuestionController {
 
     @Patch('/:id')
     @Roles(Role.user, Role.admin)
-    @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(RolesGuard)
     async updateQuestion(@Param('id') id: number, @Body() payload: updateQuestionDto, @Req() req: any) {
         try {
             const userId: number = req.user.userId;
@@ -82,7 +85,7 @@ export class QuestionController {
 
     @Delete('/:id')
     @Roles(Role.user, Role.admin)
-    @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(RolesGuard)
     async deleteQuestion(@Param('id') id: number,  @Req() req: any) {
         try {
             const userId: number = req.user.userId;
@@ -115,7 +118,7 @@ export class QuestionController {
         
     @Post('/:id/upvote')
     @Roles(Role.user)
-    @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(RolesGuard)
     async upvoteQuestion(@Param('id') questionId: number, @Body() upvoteQuestionDto: upvoteQuestionDto, @Req() req: any) {
         try {
             const userId: number = req.user.userId;
@@ -133,7 +136,7 @@ export class QuestionController {
 
     @Post('/:id/downvote')
     @Roles(Role.user)
-    @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(RolesGuard)
     async downvoteQuestion(@Param('id') answerId: number, @Body() downvoteQuestionDto: downvoteQuestionDto, @Req() req: any) {
         try {
             const userId: number = req.user.userId;
@@ -151,7 +154,7 @@ export class QuestionController {
 
     @Get('/filter/tags')
     @Roles(Role.user)
-    @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(RolesGuard)
     async getQuestionsByTags(@Body() payload: filterByTagDto) {
         try {
             return await this.questionService.getQuestionsByArrayOfTagNames(payload.tags);

@@ -6,10 +6,14 @@ import { Role, Roles, RolesGuard } from 'src/auth/roles';
 import { AuthGuard } from 'src/auth/guard';
 import { Tag } from './entities/tag.entity';
 import { DeleteTagDto } from './dto/delete-tag.dto';
+import { ApiBearerAuth, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @Controller('tag')
 @Roles(Role.admin)
 @UseGuards(AuthGuard, RolesGuard)
+@ApiTags('Tag')
+@ApiBearerAuth('JWT-auth')
+@ApiUnauthorizedResponse({ description: 'Unauthorized, please login' })
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 
