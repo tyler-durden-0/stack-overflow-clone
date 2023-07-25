@@ -1,6 +1,7 @@
+import { LikeAnswer } from 'src/like-answer/entities/like-answer.entity';
 import { Question } from 'src/question/entities/question.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
 export class Answer {
@@ -27,4 +28,7 @@ export class Answer {
 
   @ManyToOne(() => Question, (question) => question.answers)
   question: Question
+
+  @OneToMany(() => LikeAnswer, (like) => like.answer)
+  likes: LikeAnswer[];
 }

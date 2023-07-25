@@ -34,8 +34,6 @@ export class TagController {
     try {
       const isTagAlreadyExists: Tag = await this.tagService.findTagByName(updateTagDto.name);
 
-      console.log('isTagAlreadyExists', isTagAlreadyExists)
-
       if (isTagAlreadyExists) {
         const isUpdated: boolean = await this.tagService.update({...updateTagDto, tagId: isTagAlreadyExists.id});
         return {success: isUpdated};

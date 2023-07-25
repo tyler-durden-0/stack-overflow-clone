@@ -1,10 +1,11 @@
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { QuestionService } from './question.service';
-import { createQuestionDto } from './dto';
+import { createQuestionDto, upvoteQuestionDto } from './dto';
 import { Question } from './entities/question.entity';
 import { AuthGuard } from 'src/auth/guard';
 import { Role, Roles, RolesGuard } from 'src/auth/roles';
 import { updateQuestionDto } from './dto/updateQuestion.dto';
+import { LikeQuestion } from 'src/like-question/entities/like-question.entity';
 
 @Controller('question')
 export class QuestionController {
@@ -107,6 +108,25 @@ export class QuestionController {
             } else {
                 throw new BadRequestException();
             }
+        }
+    }
+
+        
+    @Post('/:id/upvote')
+    @Roles(Role.user)
+    @UseGuards(AuthGuard, RolesGuard)
+    async upvoteQuestion(@Param('id') questionId: number, @Body() upvoteQuestionDto: upvoteQuestionDto, @Req() req: any) {
+        try {
+            const userId: number = req.user.userId;
+            if (upvoteQuestionDto.increase) {
+                const isLikeCreated: LikeQuestion = await this.questionService.likeQuestion(userId, questionId);
+                return {success: !!isLikeCreated};
+            } else {
+                const isLikeDeleted: boolean = await this.questionService.removeLikeQuestion(userId, questionId);
+                return {success: isLikeDeleted};
+            }
+        } catch(err) {
+            throw err
         }
     }
 }

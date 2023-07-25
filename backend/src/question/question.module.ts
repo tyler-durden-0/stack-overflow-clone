@@ -6,9 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
 import { JwtService } from '@nestjs/jwt';
 import { TagModule } from 'src/tag/tag.module';
+import { LikeQuestionModule } from 'src/like-question/like-question.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Question]), UsersModule, TagModule],
+    imports: [TypeOrmModule.forFeature([Question]), UsersModule, TagModule, LikeQuestionModule],
     controllers: [QuestionController],
     providers: [QuestionService, JwtService],
     exports: [TypeOrmModule, QuestionService]

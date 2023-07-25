@@ -1,4 +1,5 @@
 import { Answer } from 'src/answer/entities/answer.entity';
+import { LikeQuestion } from 'src/like-question/entities/like-question.entity';
 import { Tag } from 'src/tag/entities/tag.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany, ManyToMany, JoinTable } from 'typeorm';
@@ -31,6 +32,9 @@ export class Question {
   
   @ManyToOne(() => User, (user) => user.questions)
   user: User
+
+  @OneToMany(() => LikeQuestion, (like) => like.question)
+  likes: LikeQuestion[];
 
   @ManyToMany(() => Tag)
   @JoinTable()

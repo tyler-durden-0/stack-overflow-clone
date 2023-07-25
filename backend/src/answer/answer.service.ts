@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { Answer } from './entities/answer.entity';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
@@ -7,13 +7,20 @@ import { createAnswerDto, updateAnswerDto } from './dto';
 import { User } from 'src/users/entities/user.entity';
 import { QuestionService } from 'src/question/question.service';
 import { Question } from 'src/question/entities/question.entity';
+import { LikeAnswerService } from 'src/like-answer/like-answer.service';
+import { LikeAnswer } from 'src/like-answer/entities/like-answer.entity';
 
 @Injectable()
 export class AnswerService {
     constructor(
         @InjectRepository(Answer) private answerRepository: Repository<Answer>,
         private usersService: UsersService,
-        private questionService: QuestionService) {}
+        private questionService: QuestionService,
+        private likeAnswerService: LikeAnswerService) {}
+
+    async getAnswerById(answerId: number): Promise<Answer> {
+        return this.answerRepository.findOneBy({id: answerId})
+    } 
 
     async createAnswer(payload: Partial<createAnswerDto> & {userId: number}): Promise<Answer> {
         try {
@@ -59,6 +66,52 @@ export class AnswerService {
         try {
             const deleteResult: DeleteResult = await this.answerRepository.delete({id: answerId});
             return deleteResult.affected > 0;
+        } catch(err) {
+            throw err;
+        }
+    }
+
+    async likeAnswer(userId: number, answerId: number): Promise<LikeAnswer> {
+        try {
+            const user: User = await this.usersService.findOneById(userId);
+            const answer: Answer = await this.getAnswerById(answerId);
+            if (user && answer ) {
+                const like: LikeAnswer = await this.likeAnswerService.getLikeOnAnswer(user, answer);
+                if (!like) {
+                    return this.likeAnswerService.createLikeOnAnswer(user, answer);
+                } else {
+                    throw new HttpException('You already liked this answer', HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                if (!answer) {
+                    throw new HttpException('This answer does not exist', HttpStatus.BAD_REQUEST);
+                } else {
+                    throw new HttpException('This user does not exist', HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch(err) {
+            throw err;
+        }
+    }
+
+    async removeLikeAnswer(userId: number, answerId: number): Promise<boolean> {
+        try {
+            const user: User = await this.usersService.findOneById(userId);
+            const answer: Answer = await this.getAnswerById(answerId);
+            if (user && answer) {
+                const like: LikeAnswer = await this.likeAnswerService.getLikeOnAnswer(user, answer);
+                if (like) {
+                    return this.likeAnswerService.removeLikeOnAnswer(like.id);
+                } else {
+                    throw new HttpException('You did not like this answer', HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                if (!answer) {
+                    throw new HttpException('This answer does not exist', HttpStatus.BAD_REQUEST);
+                } else {
+                    throw new HttpException('This user does not exist', HttpStatus.BAD_REQUEST);
+                }
+            }
         } catch(err) {
             throw err;
         }

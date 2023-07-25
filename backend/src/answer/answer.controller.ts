@@ -1,9 +1,10 @@
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AnswerService } from './answer.service';
-import { createAnswerDto, updateAnswerDto } from './dto';
+import { createAnswerDto, updateAnswerDto, upvoteAnswerDto } from './dto';
 import { Role, Roles, RolesGuard } from 'src/auth/roles';
 import { AuthGuard } from 'src/auth/guard';
 import { Answer } from './entities/answer.entity';
+import { LikeAnswer } from 'src/like-answer/entities/like-answer.entity';
 
 @Controller('answer')
 export class AnswerController {
@@ -58,7 +59,7 @@ export class AnswerController {
     @Delete('/:id')
     @Roles(Role.user, Role.admin)
     @UseGuards(AuthGuard, RolesGuard)
-    async deleteQuestion(@Param('id') answerId: number, @Req() req: any) {
+    async deleteAnswer(@Param('id') answerId: number, @Req() req: any) {
         try {
             const userId: number = req.user.userId;
             const userRole: string = req.user.roles;
@@ -86,4 +87,34 @@ export class AnswerController {
             }
         }
     }
+    
+    @Post('/:id/upvote')
+    @Roles(Role.user)
+    @UseGuards(AuthGuard, RolesGuard)
+    async upvoteAnswer(@Param('id') answerId: number, @Body() upvoteAnswerDto: upvoteAnswerDto, @Req() req: any) {
+        try {
+            const userId: number = req.user.userId;
+            if (upvoteAnswerDto.increase) {
+                const isLikeCreated: LikeAnswer = await this.answerService.likeAnswer(userId, answerId);
+                return {success: !!isLikeCreated};
+            } else {
+                const isLikeDeleted: boolean = await this.answerService.removeLikeAnswer(userId, answerId);
+                return {success: isLikeDeleted};
+            }
+        } catch(err) {
+            throw err
+        }
+    }
+    
+    // @Post('/:id/downvote')
+    // @Roles(Role.user)
+    // @UseGuards(AuthGuard, RolesGuard)
+    // async upvoteAnswer(@Param('id') answerId: number, @Req() req: any) {
+    //     try {
+    //         const userId: number = req.user.userId;
+    //         return await this.answerService.likeAnswer(userId, answerId);
+    //     } catch(err) {
+    //         throw err
+    //     }
+    // }
 }

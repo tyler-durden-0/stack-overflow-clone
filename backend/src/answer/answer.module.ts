@@ -6,9 +6,10 @@ import { Answer } from './entities/answer.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { QuestionModule } from 'src/question/question.module';
 import { JwtService } from '@nestjs/jwt';
+import { LikeAnswerModule } from 'src/like-answer/like-answer.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Answer]), UsersModule, QuestionModule],
+  imports: [TypeOrmModule.forFeature([Answer]), UsersModule, QuestionModule, LikeAnswerModule],
   providers: [AnswerService, JwtService],
   controllers: [AnswerController]
 })
