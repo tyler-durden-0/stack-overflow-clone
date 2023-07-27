@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { QuestionService } from './question.service';
 import { createQuestionDto, upvoteQuestionDto, downvoteQuestionDto, filterByTagDto } from './dto';
 import { Question } from './entities/question.entity';
@@ -155,11 +155,15 @@ export class QuestionController {
     @Get('/filter/tags')
     @Roles(Role.user)
     @UseGuards(RolesGuard)
-    async getQuestionsByTags(@Body() payload: filterByTagDto) {
+    async getQuestionsByTags(@Query('tags') tags: string[]) {
         try {
-            return await this.questionService.getQuestionsByArrayOfTagNames(payload.tags);
+            console.log('@@@tags', tags);
+            if (!Array.isArray(tags)) {
+                tags = [tags];
+            }
+            return await this.questionService.getQuestionsByArrayOfTagNames(tags);
         } catch(err) {
-            throw err
+            throw err;
         }
     }
 }
