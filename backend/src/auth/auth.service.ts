@@ -1,7 +1,7 @@
 import { BadRequestException, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/users/entity/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -38,7 +38,7 @@ export class AuthService {
     const user: User | null = await this.usersService.findOneByEmail(
       payload.email,
     );
-    if (await this.isPasswordValid(payload.password, user.password)) {
+    if (user && await this.isPasswordValid(payload.password, user.password)) {
       const jwtPayload = { userId: user.id };
 
       const access_token = await this.jwtService.signAsync(jwtPayload);
@@ -73,8 +73,6 @@ export class AuthService {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
       if (typeof decodedToken === 'object') {
-        console.log('decodedToken.userId', decodedToken.userId);
-        console.log('this.cacheManager.get(`refresh_token:${decodedToken.userId}`)', await this.cacheManager.get(`refresh_token:${decodedToken.userId}`))
         if (await this.cacheManager.get(`refresh_token:${decodedToken.userId}`) === payload.refresh_token) {
           //delete old token
           await this.cacheManager.del(`refresh_token:${decodedToken.userId}`);
