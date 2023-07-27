@@ -157,7 +157,6 @@ export class QuestionController {
     @UseGuards(RolesGuard)
     async getQuestionsByTags(@Query('tags') tags: string[]) {
         try {
-            console.log('@@@tags', tags);
             if (!Array.isArray(tags)) {
                 tags = [tags];
             }
