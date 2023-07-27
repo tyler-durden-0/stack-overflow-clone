@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -8,8 +8,6 @@ import { UsersModule } from './users/users.module';
 import { dataSourceOptions } from '../db/data-source';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
-import { QuestionService } from './question/question.service';
-import { QuestionController } from './question/question.controller';
 import { QuestionModule } from './question/question.module';
 import { AnswerModule } from './answer/answer.module';
 import { JwtModule } from '@nestjs/jwt';
@@ -29,7 +27,7 @@ import { DislikeQuestionModule } from './dislike-question/dislike-question.modul
       store: async () => await redisStore({
         // Store-specific configuration:
         socket: {
-          // host: 'redis-stack',
+          host: 'redis-stack',
           port: 6379,
         }
       })
@@ -45,7 +43,7 @@ import { DislikeQuestionModule } from './dislike-question/dislike-question.modul
     DislikeAnswerModule,
     DislikeQuestionModule
   ],
-  controllers: [AppController, QuestionController],
-  providers: [AppService, QuestionService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

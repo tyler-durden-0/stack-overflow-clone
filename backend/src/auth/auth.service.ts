@@ -38,7 +38,7 @@ export class AuthService {
     const user: User | null = await this.usersService.findOneByEmail(
       payload.email,
     );
-    if (await this.isPasswordValid(payload.password, user.password)) {
+    if (user && await this.isPasswordValid(payload.password, user.password)) {
       const jwtPayload = { userId: user.id };
 
       const access_token = await this.jwtService.signAsync(jwtPayload);

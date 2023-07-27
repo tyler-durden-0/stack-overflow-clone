@@ -19,7 +19,7 @@ import { UsersService } from 'src/users/users.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, UsersService],
   controllers: [AuthController],
 })
 export class AuthModule {}
